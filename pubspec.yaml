@@ -1,0 +1,22 @@
+name: navigation_app
+description: A Flutter app with a bottom navigation bar using BLoC and Clean Architecture.
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^8.1.6
+  equatable: ^2.0.5
+  get_it: ^7.7.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icons/ic_home.png
+    - assets/icons/ic_quran.png
+    - assets/icons/ic_tasbih.png
+    - assets/icons/ic_mosque.png
+    - assets/icons/ic_features.png
