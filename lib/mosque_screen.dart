@@ -1,3 +1,4 @@
+import 'package:BottomNav/home_screen.dart';
 import 'package:flutter/material.dart';
 
 class MosqueScreen extends StatelessWidget {
@@ -5,6 +6,9 @@ class MosqueScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('Mosque Screen'));
+    return const MainScreenContent(
+      title: 'Mosque Screen',
+      route: '/mosque_details',
+    );
   }
 }

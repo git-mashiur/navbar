@@ -1,3 +1,4 @@
+import 'package:BottomNav/home_screen.dart';
 import 'package:flutter/material.dart';
 
 class TasbihScreen extends StatelessWidget {
@@ -5,6 +6,9 @@ class TasbihScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('Tasbih Screen'));
+    return const MainScreenContent(
+      title: 'Tasbih Screen',
+      route: '/tasbih_details',
+    );
   }
 }

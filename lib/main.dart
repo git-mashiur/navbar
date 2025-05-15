@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'core/di/dependency_injection.dart';
-import 'presentation/screens/home_screen.dart';
+import 'home_screen.dart';
 
 void main() {
-  setupDependencies();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: HomeScreen(),
     );
   }
