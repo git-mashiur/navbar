@@ -1,4 +1,6 @@
+import 'package:BottomNav/routing_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'home_screen.dart';
 
 void main() {
@@ -10,8 +12,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: HomeScreen(),
+    return BlocProvider(
+      create: (_) => NavigationCubit(),
+      child: MaterialApp(
+        home: const HomeScreen(),
+      ),
     );
   }
 }

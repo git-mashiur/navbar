@@ -1,162 +1,171 @@
-import 'package:BottomNav/features_details.dart';
-import 'package:BottomNav/features_screen.dart';
-import 'package:BottomNav/home_details.dart';
-import 'package:BottomNav/mosque_details.dart';
-import 'package:BottomNav/mosque_screen.dart';
-import 'package:BottomNav/quran_details.dart';
-import 'package:BottomNav/quran_screen.dart';
-import 'package:BottomNav/tasbih_details.dart';
-import 'package:BottomNav/tasbih_screen.dart';
+import 'package:BottomNav/routing_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'home_details.dart';
+import 'quran_details.dart';
+import 'tasbih_details.dart';
+import 'mosque_details.dart';
+import 'features_details.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0; // Tracks the selected tab
-  final navigatorKey = GlobalKey<NavigatorState>();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Navigator(
-        key: navigatorKey,
-        onGenerateRoute: (settings) {
-          late Widget page;
-          // Main pages based on currentIndex
-          switch (_currentIndex) {
-            case 0:
-              page = const HomeScreenContent();
-              break;
-            case 1:
-              page = const QuranScreen();
-              break;
-            case 2:
-              page = const TasbihScreen();
-              break;
-            case 3:
-              page = const MosqueScreen();
-              break;
-            case 4:
-              page = const FeaturesScreen();
-              break;
-            default:
-              page = const HomeScreenContent();
-          }
-
-          // Detail pages based on route name
-          switch (settings.name) {
-            case '/home_details':
-              page = const HomeDetails();
-              break;
-            case '/quran_details':
-              page = const QuranDetails();
-              break;
-            case '/tasbih_details':
-              page = const TasbihDetails();
-              break;
-            case '/mosque_details':
-              page = const MosqueDetails();
-              break;
-            case '/features_details':
-              page = const FeaturesDetails();
-              break;
-          }
-
-          print('Current Index: $_currentIndex, Route: ${settings.name}'); // Debug print
-          return MaterialPageRoute(builder: (_) => page);
-        },
-        onPopPage: (route, result) {
-          if (route.didPop(result)) {
-            setState(() {}); // Force rebuild after popping
-          }
-          return true;
-        },
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          if (_currentIndex != index) {
-            setState(() {
-              _currentIndex = index; // Update the selected tab
-            });
-            if (navigatorKey.currentState != null) {
-              navigatorKey.currentState!.popUntil((route) => route.isFirst);
-              // Explicitly push the main page based on the new index
-              navigatorKey.currentState!.pushNamed('/');
-            }
-          }
-        },
-        items: [
-          BottomNavigationBarItem(
-            icon: Image.asset(
-              'assets/icons/ic_home.png',
-              height: 24,
-              color: _currentIndex == 0 ? Colors.purple : Colors.grey,
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.error, color: Colors.red),
-            ),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset(
-              'assets/icons/ic_quran.png',
-              height: 24,
-              color: _currentIndex == 1 ? Colors.purple : Colors.grey,
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.error, color: Colors.red),
-            ),
-            label: 'Quran',
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset(
-              'assets/icons/ic_tasbih.png',
-              height: 24,
-              color: _currentIndex == 2 ? Colors.purple : Colors.grey,
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.error, color: Colors.red),
-            ),
-            label: 'Tasbih',
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset(
-              'assets/icons/ic_mosque.png',
-              height: 24,
-              color: _currentIndex == 3 ? Colors.purple : Colors.grey,
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.error, color: Colors.red),
-            ),
-            label: 'Mosque',
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset(
-              'assets/icons/ic_features.png',
-              height: 24,
-              color: _currentIndex == 4 ? Colors.purple : Colors.grey,
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.error, color: Colors.red),
-            ),
-            label: 'Features',
-          ),
-        ],
-        selectedItemColor: Colors.purple,
-        unselectedItemColor: Colors.grey,
-        showUnselectedLabels: true,
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
-        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
-        type: BottomNavigationBarType.fixed,
-      ),
-    );
-  }
-}
-
-class HomeScreenContent extends StatelessWidget {
-  const HomeScreenContent({Key? key}) : super(key: key);
+  final List<GlobalKey<NavigatorState>> navigatorKeys = const [
+    GlobalObjectKey<NavigatorState>('home'),
+    GlobalObjectKey<NavigatorState>('quran'),
+    GlobalObjectKey<NavigatorState>('tasbih'),
+    GlobalObjectKey<NavigatorState>('mosque'),
+    GlobalObjectKey<NavigatorState>('features'),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return const MainScreenContent(
-      title: 'Home Screen',
-      route: '/home_details',
+    return BlocBuilder<NavigationCubit, int>(
+      builder: (context, currentIndex) {
+        return WillPopScope(
+          onWillPop: () async {
+            final isFirstRouteInCurrentTab =
+            !await navigatorKeys[currentIndex].currentState!.maybePop();
+            return isFirstRouteInCurrentTab;
+          },
+          child: Scaffold(
+            body: IndexedStack(
+              index: currentIndex,
+              children: List.generate(5, (index) {
+                return Navigator(
+                  key: navigatorKeys[index],
+                  onGenerateRoute: (settings) {
+                    Widget page;
+
+                    if (settings.name == '/') {
+                      switch (index) {
+                        case 0:
+                          page = const MainScreenContent(
+                              title: 'Home Screen', route: '/home_details');
+                          break;
+                        case 1:
+                          page = const MainScreenContent(
+                              title: 'Quran Screen', route: '/quran_details');
+                          break;
+                        case 2:
+                          page = const MainScreenContent(
+                              title: 'Tasbih Screen', route: '/tasbih_details');
+                          break;
+                        case 3:
+                          page = const MainScreenContent(
+                              title: 'Mosque Screen', route: '/mosque_details');
+                          break;
+                        case 4:
+                          page = const MainScreenContent(
+                              title: 'Features Screen',
+                              route: '/features_details');
+                          break;
+                        default:
+                          page = const Text("Invalid tab");
+                      }
+                    } else {
+                      switch (settings.name) {
+                        case '/home_details':
+                          page = const HomeDetails();
+                          break;
+                        case '/quran_details':
+                          page = const QuranDetails();
+                          break;
+                        case '/tasbih_details':
+                          page = const TasbihDetails();
+                          break;
+                        case '/mosque_details':
+                          page = const MosqueDetails();
+                          break;
+                        case '/features_details':
+                          page = const FeaturesDetails();
+                          break;
+                        default:
+                          page = const Center(child: Text('Unknown route'));
+                      }
+                    }
+
+                    return MaterialPageRoute(builder: (_) => page);
+                  },
+                );
+              }),
+            ),
+            bottomNavigationBar: BottomNavigationBar(
+              currentIndex: currentIndex,
+              onTap: (index) {
+                if (index != currentIndex) {
+                  context.read<NavigationCubit>().updateIndex(index);
+                } else {
+                  // If tapping the current tab, pop to its first route
+                  navigatorKeys[index]
+                      .currentState!
+                      .popUntil((route) => route.isFirst);
+                }
+              },
+              items: [
+                BottomNavigationBarItem(
+                  icon: Image.asset(
+                    'assets/icons/ic_home.png',
+                    height: 24,
+                    color: currentIndex == 0 ? Colors.purple : Colors.grey,
+                    errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.error, color: Colors.red),
+                  ),
+                  label: 'Home',
+                ),
+                BottomNavigationBarItem(
+                  icon: Image.asset(
+                    'assets/icons/ic_quran.png',
+                    height: 24,
+                    color: currentIndex == 1 ? Colors.purple : Colors.grey,
+                    errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.error, color: Colors.red),
+                  ),
+                  label: 'Quran',
+                ),
+                BottomNavigationBarItem(
+                  icon: Image.asset(
+                    'assets/icons/ic_tasbih.png',
+                    height: 24,
+                    color: currentIndex == 2 ? Colors.purple : Colors.grey,
+                    errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.error, color: Colors.red),
+                  ),
+                  label: 'Tasbih',
+                ),
+                BottomNavigationBarItem(
+                  icon: Image.asset(
+                    'assets/icons/ic_mosque.png',
+                    height: 24,
+                    color: currentIndex == 3 ? Colors.purple : Colors.grey,
+                    errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.error, color: Colors.red),
+                  ),
+                  label: 'Mosque',
+                ),
+                BottomNavigationBarItem(
+                  icon: Image.asset(
+                    'assets/icons/ic_features.png',
+                    height: 24,
+                    color: currentIndex == 4 ? Colors.purple : Colors.grey,
+                    errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.error, color: Colors.red),
+                  ),
+                  label: 'Features',
+                ),
+              ],
+              selectedItemColor: Colors.purple,
+              unselectedItemColor: Colors.grey,
+              showUnselectedLabels: true,
+              selectedLabelStyle:
+              const TextStyle(fontWeight: FontWeight.bold),
+              unselectedLabelStyle:
+              const TextStyle(fontWeight: FontWeight.normal),
+              type: BottomNavigationBarType.fixed,
+            ),
+          ),
+        );
+      },
     );
   }
 }
